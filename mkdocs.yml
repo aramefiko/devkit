@@ -1,0 +1,12 @@
+site_name: Devkit
+nav:
+    - Home: index.md
+    - Install Server LAMPP on CentOS: install-server-lampp.md
+    - Auto backup source to Google Drive:  backup-with-google-drive.md
+    - Set up SSL Let's Encrypt:  setup-ssl-let-encript.md
+
+theme: readthedocs
+extra_javascript:
+    - js/extra.js
+extra_css:
+    - css/extra.css
