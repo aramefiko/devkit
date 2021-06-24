@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Install Server LAMPP on CentOS - Devkit</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../css/theme.css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" />
+  <link href="../css/extra.css" rel="stylesheet" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Install Server LAMPP on CentOS";
+    var mkdocs_page_input_path = "install-server-lampp.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> Devkit</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                    </li>
+                </ul>
+                <ul class="current">
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">Install Server LAMPP on CentOS</a>
+    <ul class="current">
+    </ul>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../backup-with-google-drive/">Auto backup source to Google Drive</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../setup-ssl-let-encript/">Set up SSL Let's Encrypt</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">Devkit</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>Install Server LAMPP on CentOS</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="install-lampp">Install LAMPP</h1>
+<pre><code class="language-ini">yum update
+yum -y install install curl net-tools
+curl -o xampp-linux-installer.run &quot;https://downloadsapachefriends.global.ssl.fastly.net/xampp-files/7.1.29/xampp-linux-x64-7.1.29-0-installer.run?from_af=true&quot;
+sudo chmod +x xampp-linux-installer.run
+bash -c './xampp-linux-installer.run'
+</code></pre>
+<p>Khi gặp lỗi tiến trình cài đặt bị killed nữa chừng thì có thể lỗi là do phân vùng swap không đủ, thực hiện lẹnh sau để khắc phục. (copy trên internet chứ chưa tham khảo thông số của nó nghĩa là gì)</p>
+<pre><code class="language-ini">sudo dd if=/dev/zero of=swapfile bs=1024 count=2000000
+sudo mkswap -f  swapfile
+sudo swapon swapfile
+</code></pre>
+<h1 id="mo-port-804433306">Mở port 80,443,3306</h1>
+<pre><code class="language-ini">sudo iptables -I INPUT -p tcp -m tcp --dport 80 -j ACCEPT
+sudo iptables -I INPUT -p tcp -m tcp --dport 443 -j ACCEPT
+sudo iptables -I INPUT -p tcp -m tcp --dport 3306 -j ACCEPT
+</code></pre>
+<h1 id="thay-oi-user-va-group-cho-user-chay-lampp">Thay đổi user và group cho user chạy lampp</h1>
+<p>mở file /opt/lampp/etc/httpd.conf tìm dòng sau và sửa lại thành user của server nếu cần thiết</p>
+<pre><code class="language-ini">User daemon
+Group daemon
+</code></pre>
+<h1 id="public-phpmyadmin">Public phpmyadmin</h1>
+<p>Sửa nội dung file /opt/lampp/etc/extra/httpd-xampp.conf, thay đổi require từ local sang all granted </p>
+<p>nội dung ban đầu</p>
+<pre><code class="language-ini">&lt;Directory &quot;/opt/lampp/phpmyadmin&quot;&gt;
+    AllowOverride AuthConfig Limit
+    Require local
+    ErrorDocument 403 /error/XAMPP_FORBIDDEN.html.var
+&lt;/Directory&gt;
+</code></pre>
+<p>sửa thành</p>
+<pre><code class="language-ini">&lt;Directory &quot;/opt/lampp/phpmyadmin&quot;&gt;
+    AllowOverride AuthConfig Limit
+    Require all granted
+    ErrorDocument 403 /error/XAMPP_FORBIDDEN.html.var
+&lt;/Directory&gt;
+</code></pre>
+<h1 id="sua-oi-file-host-etchosts">Sửa đổi file host /etc/hosts</h1>
+<p>Để cho phép truy cập từ ngoài vào server chạy xampp thì đầu tiên là cần trỏ tên miền về IP public của server, đến đây, server đã có thể truy cập từ bên ngoài vào rồi. Việc sửa đổi file hosts là 1 trong các việc phải làm nếu muốn server chạy nhiều domain, có thể tham khảo bài viết hướng dẫn tạo domain cho server chạy xampp.</p>
+<pre><code class="language-ini">127.0.0.1 localhost
+127.0.0.1 khanhtoan.name.vn
+</code></pre>
+<h1 id="config-login-cho-phpmyadmin">Config login cho phpmyadmin</h1>
+<p>Thay đổi auth_type thành http trong file /opt/lampp/phpmyadmin/config.inc.php và comment 2 dòng config username và password lại.</p>
+<pre><code class="language-php">$cfg['Servers'][$i]['auth_type'] = 'http';
+</code></pre>
+<h1 id="thay-oi-mat-khau-root-mysql">Thay đổi mật khẩu root mysql</h1>
+<pre><code class="language-ini">mysql -u root -p
+USE mysql;
+UPDATE user SET password=PASSWORD('YourPasswordHere') WHERE User='root' AND Host = 'localhost';
+FLUSH PRIVILEGES;
+</code></pre>
+<p>Đối với LAMPP thì mysql nằm ở đường dẫn /opt/lampp/bin/mysql, do đó cmd sẽ là:</p>
+<pre><code class="language-ini">/opt/lampp/bin/mysql -u=&quot;root&quot;
+</code></pre>
+<h1 id="them-vhosts-va-apache">Thêm vhosts và apache</h1>
+<p>Sửa file bằng công cụ vim, chạy lệnh sau và ấn phim i để sửa, sửa xong bấm phím esc và gõ :wq sau đó enter để lưu file lại.</p>
+<pre><code class="language-ini">vi /opt/lampp/etc/httpd.conf
+</code></pre>
+<p>Thêm vào cuối file tên dòng lệnh sau:</p>
+<pre><code class="language-ini">Include &quot;/opt/lampp/etc/extra/httpd-vhosts.conf&quot;
+</code></pre>
+<h1 id="cau-hinh-vhost">Cấu hình vhost</h1>
+<p>Mở file /opt/lampp/etc/extra/httpd-vhost.conf và add thêm domain vào, ví dụ thêm domain mautic.dotb.vn, có thư mục root chưa source là /opt/lampp/htdocs/mautic.dotb.vn</p>
+<pre><code class="language-ini">&lt;VirtualHost 127.0.0.1:80&gt;
+     DocumentRoot &quot;/opt/lampp/htdocs/mautic.dotb.vn&quot;
+     ServerName mautic.dotb.vn
+     ServerAlias www.mautic.dotb.vn
+&lt;/VirtualHost&gt;
+</code></pre>
+<p>Sau tất cả các cấu hình, tiến hành restart lại lampp</p>
+<pre><code class="language-ini">/opt/lampp/lampp restart
+</code></pre>
+<h1 id="script">Script</h1>
+<pre><code class="language-ini">#!/bin/bash
+#user
+if [ $(id -u) -eq 0 ]; then
+  read -p &quot;Enter host Domain: &quot; domainname
+  read -p &quot;Enter new Domain username: &quot; tusername
+  egrep &quot;^$tusername&quot; /etc/passwd &gt;/dev/null
+  if [ $? -eq 0 ]; then
+    echo &quot;$tusername exists!&quot;
+    exit 1
+  else
+    useradd $tusername
+    passwd $tusername
+    read -p &quot;Enter new password again (latest): &quot; tpassword
+  fi
+else
+  echo &quot;Only root may add a user to the system&quot;
+  exit 2
+fi
+read -p &quot;Enter new MySQL root password : &quot; spassword
+mkdir &quot;/home/$tusername/$domainname&quot;
+echo &quot;success! $domainname - $tusername&quot; &gt;&gt;/home/$tusername/$domainname/index.php
+chown -R $tusername:$tusername /home/$tusername
+echo &quot;127.0.0.1 $domainname&quot; &gt;&gt;/etc/hosts
+yum -y update
+#java
+yum -y install java-1.8.0-openjdk.x86_64
+#lampp
+yum -y install curl net-tools
+curl -o lampp.run &quot;https://downloadsapachefriends.global.ssl.fastly.net/xampp-files/7.1.29/xampp-linux-x64-7.1.29-0-installer.run?from_af=true&quot;
+chmod +x lampp.run
+bash -c './lampp.run'
+ln -sf /opt/lampp/lampp /usr/bin/lampp
+ln -sf /opt/lampp/bin/mysql /usr/bin/mysql
+ln -sf /opt/lampp/bin/php /usr/bin/php
+lampp restart
+lampp stopftp
+#httpd and php
+sed -i.bak s'/Require local/Require all granted/g' /opt/lampp/etc/extra/httpd-xampp.conf
+sed -i &quot;s/'config'/'http'/g&quot; /opt/lampp/phpmyadmin/config.inc.php
+echo 'Include &quot;/opt/lampp/etc/extra/httpd-vhosts.conf&quot;' &gt;&gt;/opt/lampp/etc/httpd.conf
+sed -i &quot;s/User daemon/User $tusername/g&quot; /opt/lampp/etc/httpd.conf
+sed -i &quot;s/Group daemon/Group $tusername/g&quot; /opt/lampp/etc/httpd.conf
+sed -i &quot;s/\/opt\/lampp\/htdocs/\/home/g&quot; /opt/lampp/etc/httpd.conf
+sed -i &quot;s/webmaster@dummy-host.example.com/contact@dotb.vn/g&quot; /opt/lampp/etc/extra/httpd-vhosts.conf
+sed -i &quot;s/\/opt\/lampp\/docs\/dummy-host.example.com/\/home\/$tusername\/$domainname/g&quot; /opt/lampp/etc/extra/httpd-vhosts.conf
+sed -i &quot;s/dummy-host.example.com/$domainname/g&quot; /opt/lampp/etc/extra/httpd-vhosts.conf
+rm -f /opt/lampp/etc/php.ini
+echo '[PHP]
+engine=On
+short_open_tag=Off
+short_open_tag=On
+asp_tags=Off
+precision=14
+y2k_compliance=On
+output_buffering=4096
+zlib.output_compression=Off
+implicit_flush=Off
+unserialize_callback_func=
+serialize_precision=100
+allow_call_time_pass_reference=Off
+safe_mode=Off
+safe_mode_gid=Off
+safe_mode_include_dir=
+safe_mode_exec_dir=
+safe_mode_allowed_env_vars=PHP_
+safe_mode_protected_env_vars=LD_LIBRARY_PATH
+disable_functions=
+disable_classes=
+expose_php=On
+max_execution_time=3600
+max_input_time=3600
+memory_limit=2048M
+error_reporting=E_ALL &amp; ~E_DEPRECATED &amp; ~E_STRICT
+display_errors=Off
+display_startup_errors=On
+log_errors=On
+log_errors_max_len=1024
+ignore_repeated_errors=Off
+ignore_repeated_source=Off
+report_memleaks=On
+track_errors=On
+html_errors=On
+error_log=&quot;/opt/lampp/logs/php_error_log&quot;
+variables_order=&quot;GPCS&quot;
+request_order=&quot;GP&quot;
+register_globals=Off
+register_long_arrays=Off
+register_argc_argv=Off
+auto_globals_jit=On
+post_max_size=1280M
+magic_quotes_gpc=Off
+magic_quotes_runtime=Off
+magic_quotes_sybase=Off
+auto_prepend_file=
+auto_append_file=
+default_mimetype=&quot;text/html&quot;
+doc_root=
+user_dir=
+enable_dl=Off
+file_uploads=On
+upload_tmp_dir=&quot;/opt/lampp/temp/&quot;
+upload_max_filesize=1280M
+allow_url_fopen=On
+allow_url_include=Off
+default_socket_timeout=60
+[Date]
+date.timezone=Asia/Ho_Chi_Minh
+[filter]
+[iconv]
+[intl]
+[sqlite]
+[sqlite3]
+[Pcre]
+[Pdo]
+[Pdo_mysql]
+pdo_mysql.cache_size=2000
+pdo_mysql.default_socket=
+[Phar]
+[Syslog]
+define_syslog_variables=Off
+[mail function]
+SMTP=localhost
+smtp_port=25
+mail.add_x_header=On
+[SQL]
+sql.safe_mode=Off
+[ODBC]
+odbc.allow_persistent=On
+odbc.check_persistent=On
+odbc.max_persistent=-1
+odbc.max_links=-1
+odbc.defaultlrl=4096
+odbc.defaultbinmode=1
+[Interbase]
+ibase.allow_persistent=1
+ibase.max_persistent=-1
+ibase.max_links=-1
+ibase.timestampformat=&quot;%Y-%m-%d %H:%M:%S&quot;
+ibase.dateformat=&quot;%Y-%m-%d&quot;
+ibase.timeformat=&quot;%H:%M:%S&quot;
+[MySQL]
+mysql.allow_local_infile=On
+mysql.allow_persistent=On
+mysql.cache_size=2000
+mysql.max_persistent=-1
+mysql.max_links=-1
+mysql.default_port=
+mysql.default_socket=
+mysql.default_host=
+mysql.default_user=
+mysql.default_password=
+mysql.connect_timeout=60
+mysql.trace_mode=Off
+[MySQLi]
+mysqli.max_persistent=-1
+mysqli.max_links=-1
+mysqli.cache_size=2000
+mysqli.default_port=3306
+mysqli.default_socket=
+mysqli.default_host=
+mysqli.default_user=
+mysqli.default_pw=
+mysqli.reconnect=Off
+[mysqlnd]
+mysqlnd.collect_statistics=On
+mysqlnd.collect_memory_statistics=On
+[OCI8]
+[PostgresSQL]
+pgsql.allow_persistent=On
+pgsql.auto_reset_persistent=Off
+pgsql.max_persistent=-1
+pgsql.max_links=-1
+pgsql.ignore_notice=0
+pgsql.log_notice=0
+[Sybase-CT]
+sybct.allow_persistent=On
+sybct.max_persistent=-1
+sybct.max_links=-1
+sybct.min_server_severity=10
+sybct.min_client_severity=10
+[bcmath]
+bcmath.scale=0
+[browscap]
+[Session]
+session.save_handler=files
+session.save_path=&quot;/opt/lampp/temp/&quot;
+session.use_cookies=1
+session.use_only_cookies=1
+session.name=PHPSESSID
+session.auto_start=0
+session.cookie_lifetime=0
+session.cookie_path=/
+session.cookie_domain=
+session.cookie_httponly=1
+session.serialize_handler=php
+session.gc_probability=1
+session.gc_divisor=1000
+session.gc_maxlifetime=1440
+session.bug_compat_42=On
+session.bug_compat_warn=On
+session.referer_check=
+session.entropy_length=0
+session.entropy_file=
+session.cache_limiter=nocache
+session.cache_expire=180
+session.use_trans_sid=1
+session.hash_function=0
+session.hash_bits_per_character=5
+url_rewriter.tags=&quot;a=href,area=href,frame=src,input=src,form=fakeentry&quot;
+[MSSQL]
+mssql.allow_persistent=On
+mssql.max_persistent=-1
+mssql.max_links=-1
+mssql.min_error_severity=10
+mssql.min_message_severity=10
+mssql.compatability_mode=Off
+mssql.secure_connection=Off
+[Assertion]
+[COM]
+[mbstring]
+[gd]
+[exif]
+[Tidy]
+tidy.clean_output=Off
+[soap]
+soap.wsdl_cache_enabled=1
+soap.wsdl_cache_dir=&quot;/tmp&quot;
+soap.wsdl_cache_ttl=86400
+soap.wsdl_cache_limit=5
+[sysvshm]
+[ldap]
+ldap.max_links=-1
+[mcrypt]
+[dba]
+openssl.cafile=/opt/lampp/share/curl/curl-ca-bundle.crt
+' &gt;&gt;/opt/lampp/etc/php.ini
+#mysql
+echo &quot;
+use mysql;
+UPDATE user SET password=PASSWORD('$spassword') WHERE User='root';
+FLUSH PRIVILEGES;
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '$spassword';
+FLUSH PRIVILEGES;
+&quot; &gt;&gt;/change_password_mysql.sql
+echo &quot;&gt;&gt;press Enter to pass ask below&lt;&lt;&quot;
+mysql -u root -p mysql &lt;/change_password_mysql.sql
+rm -f /change_password_mysql.sql
+rm -f /opt/lampp/etc/my.cnf
+echo '
+[client]
+port        = 3306
+socket      = /opt/lampp/var/mysql/mysql.sock
+[mysqld]
+user = mysql
+port=3306
+socket      = /opt/lampp/var/mysql/mysql.sock
+skip-external-locking
+key_buffer = 160M
+max_allowed_packet = 10M
+table_open_cache = 64
+sort_buffer_size = 5M
+net_buffer_length = 80K
+read_buffer_size = 2M
+read_rnd_buffer_size = 5M
+myisam_sort_buffer_size = 80M
+plugin_dir = /opt/lampp/lib/mysql/plugin/
+server-id   = 1
+innodb_data_home_dir = /opt/lampp/var/mysql/
+innodb_data_file_path = ibdata1:10M:autoextend
+innodb_log_group_home_dir = /opt/lampp/var/mysql/
+innodb_buffer_pool_size = 160M
+innodb_log_file_size = 50M
+innodb_log_buffer_size = 80M
+innodb_flush_log_at_trx_commit = 1
+innodb_lock_wait_timeout = 50
+[mysqldump]
+quick
+max_allowed_packet = 160M
+[mysql]
+no-auto-rehash
+[isamchk]
+key_buffer = 200M
+sort_buffer_size = 200M
+read_buffer = 20M
+write_buffer = 20M
+[myisamchk]
+key_buffer = 200M
+sort_buffer_size = 200M
+read_buffer = 20M
+write_buffer = 20M
+[mysqlhotcopy]
+interactive-timeout
+!include /opt/lampp/mysql/my.cnf
+' &gt;&gt;/opt/lampp/etc/my.cnf
+#elasticsearch
+rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
+echo &quot;[elasticsearch-6.x]&quot; &gt;&gt;/etc/yum.repos.d/elasticsearch.repo
+echo &quot;name=Elasticsearch repository for 6.x packages&quot; &gt;&gt;/etc/yum.repos.d/elasticsearch.repo
+echo &quot;baseurl=https://artifacts.elastic.co/packages/6.x/yum&quot; &gt;&gt;/etc/yum.repos.d/elasticsearch.repo
+echo &quot;gpgcheck=1&quot; &gt;&gt;/etc/yum.repos.d/elasticsearch.repo
+echo &quot;gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch&quot; &gt;&gt;/etc/yum.repos.d/elasticsearch.repo
+echo &quot;enabled=1&quot; &gt;&gt;/etc/yum.repos.d/elasticsearch.repo
+echo &quot;autorefresh=1&quot; &gt;&gt;/etc/yum.repos.d/elasticsearch.repo
+echo &quot;type=rpm-md&quot; &gt;&gt;/etc/yum.repos.d/elasticsearch.repo
+yum -y install elasticsearch
+/bin/systemctl daemon-reload
+/bin/systemctl enable elasticsearch.service
+systemctl start elasticsearch.service
+lampp restart
+echo &quot;===========SERVER DEPLOY SCRIPT============&quot;
+echo &quot;==domain              : $domainname&quot;
+echo &quot;==user                   : $tusername&quot;
+echo &quot;==pass                  : $tpassword&quot;
+echo &quot;==pass root mysql: $spassword&quot;
+echo &quot;=========================================&quot;
+</code></pre>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../backup-with-google-drive/" class="btn btn-neutral float-right" title="Auto backup source to Google Drive">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href=".." class="btn btn-neutral" title="Home"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href=".." style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../backup-with-google-drive/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../js/extra.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

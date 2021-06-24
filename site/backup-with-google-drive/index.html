@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Auto backup source to Google Drive - Devkit</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../css/theme.css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" />
+  <link href="../css/extra.css" rel="stylesheet" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Auto backup source to Google Drive";
+    var mkdocs_page_input_path = "backup-with-google-drive.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> Devkit</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../install-server-lampp/">Install Server LAMPP on CentOS</a>
+                    </li>
+                </ul>
+                <ul class="current">
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">Auto backup source to Google Drive</a>
+    <ul class="current">
+    </ul>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../setup-ssl-let-encript/">Set up SSL Let's Encrypt</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">Devkit</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>Auto backup source to Google Drive</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="cai-at-gdrive-tren-centos">Cài đặt Gdrive trên Centos</h1>
+<p>Đối với centos 64bit sẽ chạy file gdrive-linux-x64, đối với 32bit chạy file gdrive-linux-386</p>
+<p><a href="../files/gdrive-linux-x64">File 64bit</a></p>
+<p><a href="../files/gdrive-linux-386">File 32bit</a></p>
+<pre><code class="language-bash">yum install wget
+wget -O drive http://document.dotb.vn/files/gdrive-linux-x64
+mv drive /usr/sbin/drive
+chmod 755 /usr/sbin/drive
+
+</code></pre>
+<h1 id="xac-thuc-tai-khoan-google-drive">Xác thực tài khoản Google Drive</h1>
+<pre><code class="language-bash">drive about
+
+Go to the following link in your browser:  
+https://accounts.google.com/o/oauth2/auth?client_id=123456789123-7n0vf5akeru7on6o2fjinrecpdoe99eg.apps.googleusercontent.com&amp;redirect_uri=urn%3Aietf%3Awg%3Aoauth%3A2.0%3Aoob&amp;response_type=code&amp;scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive&amp;state=state
+
+Enter verification code: 4/9gKYAFAJ326XIP6JJHAEhs342t35LPiA5QGW0935GHWHy9
+
+</code></pre>
+<h1 id="tao-file-sh-e-execute">Tạo file sh để execute</h1>
+<pre><code class="language-bash">#!/bin/bash
+
+#thư mục lưu file backup, KHÔNG chứa dấu / ở cuối
+BACKUPDIR='/home/backup'
+
+#thông tin nơi chứa source cần backup
+SOURCENAME='dotb_tomato_crm'
+SOURCEDIR='/opt/lampp/htdocs/crm.tomato.edu.vn'
+
+#tài khoản truy cập database
+DBUSER='root'
+DBPASSWORD='hD41B*7l9e^S'
+DBNAME='online_crm_tomato'
+
+#path to mysqldump execute
+PATHMYSQLDUMP='/opt/lampp/bin/mysqldump'
+
+#số ngày lưu backup
+DATESUB=7
+
+#folder google drive id
+FOLDER_GDRIVE='1qFMC-bO3FqbNCpS0nlQLx3dHoMtvn9Qz'
+
+#script xử lý
+#DO NOT EDIT
+DATENOW=`date +%Y-%m-%d`
+DATEDEL=$(date --date=&quot;${DATENOW} -${DATESUB} day&quot; +%Y_%m_%d)
+rm -f $BACKUPDIR/`echo $DATEDEL`_$SOURCENAME.zip
+DBOUT=&quot;$BACKUPDIR/$DBNAME.sql&quot;
+`echo $PATHMYSQLDUMP` --force --opt -u $DBUSER --password=$DBPASSWORD $DBNAME &gt; $DBOUT
+zip -r $BACKUPDIR/$SOURCENAME.zip $SOURCEDIR
+zip $BACKUPDIR/`date +%Y_%m_%d`_$SOURCENAME.zip $DBOUT $BACKUPDIR/$SOURCENAME.zip
+rm -f $DBOUT
+rm -f $BACKUPDIR/$SOURCENAME.zip
+drive upload -p $FOLDER_GDRIVE $BACKUPDIR/`date +%Y_%m_%d`_$SOURCENAME.zip
+</code></pre>
+<h1 id="cai-at-cronjob">Cài đặt cronjob</h1>
+<pre><code class="language-bash">crontab -e
+
+#bấm i để vào chết độ insert
+#chèn dòng thực thi backup hằng ngày vào 0h
+0 0 * * * path_to_file_bash_backup
+</code></pre>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../setup-ssl-let-encript/" class="btn btn-neutral float-right" title="Set up SSL Let's Encrypt">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../install-server-lampp/" class="btn btn-neutral" title="Install Server LAMPP on CentOS"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href="../install-server-lampp/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../setup-ssl-let-encript/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../js/extra.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>
